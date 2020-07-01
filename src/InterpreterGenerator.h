@@ -334,6 +334,7 @@ public:
         children.push_back(visitTupleOperation(aggregate));
         return std::make_unique<InterpreterNode>(I_Aggregate, &aggregate, std::move(children), rel);
     }
+
     NodePtr visitParallelAggregate(const RamParallelAggregate& aggregate) override {
         size_t relId = encodeRelation(aggregate.getRelation());
         auto rel = relations[relId].get();
@@ -346,6 +347,7 @@ public:
         res->setPreamble(parentQueryPreamble);
         return res;
     }
+
     NodePtr visitIndexAggregate(const RamIndexAggregate& aggregate) override {
         size_t relId = encodeRelation(aggregate.getRelation());
         auto rel = relations[relId].get();
