@@ -1093,7 +1093,7 @@ void Synthesiser::emitCode(std::ostream& out, const RamStatement& stmt) {
             std::string sharedVariable = "res0";
             if (aggregate.getFunction() == AggregateOp::MEAN) {
                 out << type << " res1 = " << init << ";\n";
-                sharedVariable += ", res1";  // now shared variable is res0, res1
+                sharedVariable += ", res1";
             }
 
             // create a partitioning of the relation to iterate over simeltaneously
