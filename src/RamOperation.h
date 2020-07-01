@@ -988,10 +988,9 @@ public:
             pattern.second.emplace_back(i->clone());
         }
         return new RamParallelIndexAggregate(souffle::clone(&getOperation()), function,
-                std::unique_ptr<RamRelationReference>(relationRef->clone()),
-                std::unique_ptr<RamExpression>(expression->clone()),
-                std::unique_ptr<RamCondition>(condition->clone()), std::move(pattern), getTupleId());
-    }
+                souffle::clone(relationRef), souffle::clone(expression), souffle::clone(condition),
+                std::move(pattern), getTupleId());
+}
 
 protected:
     void print(std::ostream& os, int tabpos) const override {
