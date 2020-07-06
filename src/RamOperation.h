@@ -992,6 +992,7 @@ public:
                 std::move(pattern), getTupleId());
     }
 
+
 protected:
     void print(std::ostream& os, int tabpos) const override {
         os << times(" ", tabpos);

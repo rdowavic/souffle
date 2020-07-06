@@ -1050,6 +1050,65 @@ void Synthesiser::emitCode(std::ostream& out, const RamStatement& stmt) {
                     out << "shouldRunNested = true;\n";
                     break;
             }
+            // set reduction operation
+            std::string op;
+            switch (aggregate.getFunction()) {
+                case AggregateOp::MIN:
+                case AggregateOp::FMIN:
+                case AggregateOp::UMIN: {
+                    op = "min";
+                    break;
+                }
+
+                case AggregateOp::MAX:
+                case AggregateOp::FMAX:
+                case AggregateOp::UMAX: {
+                    op = "max";
+                    break;
+                }
+
+                case AggregateOp::MEAN:
+                case AggregateOp::FSUM:
+                case AggregateOp::USUM:
+
+                case AggregateOp::SUM: {
+                    op = "+";
+                    break;
+                }
+
+                case AggregateOp::COUNT: break;
+                default: fatal("Unhandled aggregate operation");
+            }
+
+            // Set reduction operation
+            std::string op;
+            switch (aggregate.getFunction()) {
+                case AggregateOp::MIN:
+                case AggregateOp::FMIN:
+                case AggregateOp::UMIN: {
+                    op = "min";
+                    break;
+                }
+
+                case AggregateOp::MAX:
+                case AggregateOp::FMAX:
+                case AggregateOp::UMAX: {
+                    op = "max";
+                    break;
+                }
+
+                case AggregateOp::MEAN:
+                case AggregateOp::FSUM:
+                case AggregateOp::USUM:
+
+                case AggregateOp::SUM: {
+                    op = "+";
+                    break;
+                }
+
+                case AggregateOp::COUNT: break;
+                default: fatal("Unhandled aggregate operation");
+            }
 
             // Set reduction operation
             std::string op;
@@ -1104,9 +1163,6 @@ void Synthesiser::emitCode(std::ostream& out, const RamStatement& stmt) {
             out << preamble.str();
             // pragma statement
             out << "#pragma omp for reduction(" << op << ":" << sharedVariable << ")\n";
-            // check whether there is an index to use
-            // out << "for(const auto& env" << identifier << " : "
-            //    << "*" << relName << ") {\n";
             // iterate over each part
             out << "for (auto it = part.begin(); it < part.end(); ++it) {\n";
             // iterate over tuples in each part
@@ -1123,14 +1179,14 @@ void Synthesiser::emitCode(std::ostream& out, const RamStatement& stmt) {
                 case AggregateOp::FMIN:
                 case AggregateOp::UMIN:
                 case AggregateOp::MIN:
-                    out << "res" << identifier << " = std::min(res0, ramBitCast<" << type << ">(";
+                    out << "res0 = std::min(res0, ramBitCast<" << type << ">(";
                     visit(aggregate.getExpression(), out);
                     out << "));\n";
                     break;
                 case AggregateOp::FMAX:
                 case AggregateOp::UMAX:
                 case AggregateOp::MAX:
-                    out << "res" << identifier << " = std::max(res0, ramBitCast<" << type << ">(";
+                    out << "res0 = std::max(res0, ramBitCast<" << type << ">(";
                     visit(aggregate.getExpression(), out);
                     out << "));\n";
                     break;
@@ -1138,16 +1194,13 @@ void Synthesiser::emitCode(std::ostream& out, const RamStatement& stmt) {
                 case AggregateOp::FSUM:
                 case AggregateOp::USUM:
                 case AggregateOp::SUM:
-                    out << "res0 += "
-                        << "ramBitCast<" << type << ">(";
-                    ;
+                    out << "res0 += ramBitCast<" << type << ">(";
                     visit(aggregate.getExpression(), out);
                     out << ");\n";
                     break;
 
                 case AggregateOp::MEAN:
-                    out << "res0 += "
-                        << "ramBitCast<RamFloat>(";
+                    out << "res0 += ramBitCast<RamFloat>(";
                     visit(aggregate.getExpression(), out);
                     out << ");\n";
                     out << "++res1;\n";
@@ -1172,7 +1225,6 @@ void Synthesiser::emitCode(std::ostream& out, const RamStatement& stmt) {
             out << "if (shouldRunNested) {\n";
             visitTupleOperation(aggregate, out);
             out << "}\n";
-
             PRINT_END_COMMENT(out);
         }
         void visitAggregate(const RamAggregate& aggregate, std::ostream& out) override {
